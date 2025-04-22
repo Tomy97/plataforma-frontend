@@ -2,7 +2,7 @@ name: Build, Lint, Test & Deploy Frontend
 
 on:
   push:
-    branches: [ master, main, develop ]
+    branches: [ master, develop ]
   pull_request:
     branches: [ master, develop ]
 
@@ -16,26 +16,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 1) Instalo Node + pnpm
+      # 1) Instalo Node + npm
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22.x'
-          cache: pnpm
+          cache: npm
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - name: Install dependencies
+        run: npm ci
 
       # 2) Preparo el proyecto
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
 
       - name: Lint
-        run: pnpm run lint
+        run: npm run lint
 
       - name: Test
-        run: pnpm run test
-
+        run: npm run test
+      
       # 3) Ahora build + push del contenedor
       - name: Azure Login
         uses: azure/login@v1
