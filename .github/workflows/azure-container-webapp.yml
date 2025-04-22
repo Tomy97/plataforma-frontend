@@ -1,0 +1,61 @@
+name: Build, Lint, Test & Deploy Frontend
+
+on:
+  push:
+    branches: [ master, main, develop ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY_LOGIN_SERVER: plataforma-frontend-app.azurecr.io
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 1) Instalo Node + pnpm
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+          cache: pnpm
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      # 2) Preparo el proyecto
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Test
+        run: pnpm run test
+
+      # 3) Ahora build + push del contenedor
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: ACR Login
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.REGISTRY_LOGIN_SERVER }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY_LOGIN_SERVER }}/plataforma-frontend:${{ github.sha }}
+
+      # 4) Deploy al Web App for Containers
+      - name: Deploy to Azure Web App for Containers
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: plataforma-frontend-app
+          images: ${{ env.REGISTRY_LOGIN_SERVER }}/plataforma-frontend:${{ github.sha }}
