@@ -9,6 +9,8 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    env:
+      REGISTRY_LOGIN_SERVER: plataforma-frontend-app.azurecr.io
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -46,6 +48,8 @@ jobs:
   deploy:
     if: github.event_name == 'push'
     needs: ci
+    env:
+      REGISTRY_LOGIN_SERVER: plataforma-frontend-app.azurecr.io
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
