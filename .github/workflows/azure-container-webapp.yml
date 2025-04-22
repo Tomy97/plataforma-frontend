@@ -32,7 +32,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: 9
+          cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       # 4) Instalo las dependencias usando el store cacheado
       - name: Install dependencies
